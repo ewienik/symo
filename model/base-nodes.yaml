@@ -1,0 +1,13 @@
+nodes:
+  template-person:
+    definition: '{{id}}(("{{name}}<br/>[Person]<br/><br/>{{{description}}}"))'
+
+  template-software-system:
+    definition: '{{id}}("{{name}}<br/>[Software System]<br/><br/>{{{description}}}")'
+
+  template-container:
+    definition: '{{id}}["{{name}}<br/>[Container{{#if technology}}: {{technology}}{{/if}}]{{#if description}}<br/><br/>{{{description}}}{{/if}}"]'
+
+  template-dir:
+    definition: '{{id}}[("{{name}}<br/>[Container: Dir{{#if technology}}/{{technology}}{{/if}}]{{#if description}}<br/><br/>{{{description}}}{{/if}}")]'
+

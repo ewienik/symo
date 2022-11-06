@@ -1,0 +1,11 @@
+relationships:
+  base:
+    definition: '{{left}} -.->|"{{description}}{{#if technology}}\n[{{technology}}]{{/if}}"| {{right}}'
+
+  updates:
+    parent: base
+    description: Updates
+
+  uses:
+    parent: base
+    description: Uses

@@ -1,0 +1,38 @@
+nodes:
+
+  dir-model:
+    parent: template-dir
+    name: YAML model
+    description: 'Directory with yaml model files'
+
+  dir-template:
+    parent: template-dir
+    name: template docs
+    description: 'Directory with template markdown files'
+
+  dir-docs:
+    parent: template-dir
+    name: out docs
+    description: 'Directory with output markdown files'
+
+  tool:
+    parent: template-container
+    name: symo
+    technology: Rust
+    description: Symo tool
+    relationships:
+      dir-model:
+        parent: uses
+      dir-template:
+        parent: uses
+      dir-docs:
+        parent: updates
+
+  user:
+    parent: template-person
+    name: User
+    description: The User of the symo tool
+    relationships:
+      tool:
+        parent: uses
+

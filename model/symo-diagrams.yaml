@@ -1,0 +1,13 @@
+diagrams:
+  overall-concept: |
+    ```mermaid
+    flowchart LR
+    user
+    dir-model
+    dir-template
+    tool
+    dir-docs
+
+    {{{definitions}}}
+    ```
+
