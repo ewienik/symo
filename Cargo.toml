@@ -1,8 +1,12 @@
 [package]
 name = "symo"
 version = "0.1.0"
+authors = ["Pawel Pery"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
+description = "Documentation tool for SYstem based on MOdel"
+homepage = "https://github.com/ewienik/symo"
+repository = "https://github.com/ewienik/symo"
 
 [dependencies]
 anyhow = "*"
