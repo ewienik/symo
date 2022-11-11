@@ -3,7 +3,7 @@
 # symo
 
 Documentation tool for SYstem based on MOdel. Create model of system in yaml
-declarative, prepare mardown docs & marmaid diagrams templates and render docs
+declarative, prepare mardown docs & mermaid diagrams templates and render docs
 with tool. Watch model & templates dir & recreate docs. Serve docs with simple
 static http server.
 
