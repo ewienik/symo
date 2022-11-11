@@ -1,5 +1,5 @@
 use {
-    crate::Merge,
+    crate::output::Merge,
     anyhow::Context,
     handlebars::Handlebars,
     serde::{Deserialize, Serialize},

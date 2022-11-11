@@ -1,5 +1,5 @@
 use {
-    crate::{node::Node, relationship::Relationship, Merge},
+    crate::{node::Node, output::Merge, relationship::Relationship},
     serde::{Deserialize, Serialize},
     std::{
         collections::{BTreeMap, HashSet},

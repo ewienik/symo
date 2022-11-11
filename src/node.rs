@@ -1,5 +1,5 @@
 use {
-    crate::{model::Model, relationship::Relationship, Merge},
+    crate::{model::Model, output::Merge, relationship::Relationship},
     anyhow::Context,
     handlebars::Handlebars,
     serde::{Deserialize, Serialize},

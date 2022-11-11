@@ -1,5 +1,6 @@
 use std::env;
 
-fn main() {
-    symo::run(env::args_os());
+#[tokio::main]
+async fn main() {
+    symo::run(env::args_os()).await;
 }
