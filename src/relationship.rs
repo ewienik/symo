@@ -21,16 +21,16 @@ impl Merge for Relationship {
     }
 
     fn merge(&mut self, parent: &Self) {
-        if let None = self.right {
+        if self.right.is_none() {
             self.right = parent.right.clone();
         }
-        if let None = self.description {
+        if self.description.is_none() {
             self.description = parent.description.clone();
         }
-        if let None = self.technology {
+        if self.technology.is_none() {
             self.technology = parent.technology.clone();
         }
-        if let None = self.definition {
+        if self.definition.is_none() {
             self.definition = parent.definition.clone();
         }
     }
@@ -41,8 +41,7 @@ impl Relationship {
         self.definition = Some(
             handlebars
                 .render_template(
-                    &self
-                        .definition
+                    self.definition
                         .as_ref()
                         .context(format!("no definition for {:?}", self))
                         .unwrap(),
