@@ -23,16 +23,16 @@ impl Merge for Node {
     }
 
     fn merge(&mut self, parent: &Self) {
-        if let None = self.name {
+        if self.name.is_none() {
             self.name = parent.name.clone();
         }
-        if let None = self.description {
+        if self.description.is_none() {
             self.description = parent.description.clone();
         }
-        if let None = self.technology {
+        if self.technology.is_none() {
             self.technology = parent.technology.clone();
         }
-        if let None = self.definition {
+        if self.definition.is_none() {
             self.definition = parent.definition.clone();
         }
     }
@@ -74,7 +74,7 @@ impl Node {
             parent_relationships.for_each(|(id_relationship, parent)| {
                 if let Some(child) = relationships.get_mut(id_relationship) {
                     child.left = Some(id.to_string());
-                    child.merge(&parent);
+                    child.merge(parent);
                 } else {
                     relationships.insert(id_relationship.clone(), parent.clone());
                 }

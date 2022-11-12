@@ -38,7 +38,7 @@ fn merge<T: Merge>(map: &mut BTreeMap<String, T>) {
             })
             .map(|(name, child)| (name.clone(), (*child).clone()))
             .collect();
-        if outstanding.len() == 0 {
+        if outstanding.is_empty() {
             map.iter()
                 .filter(|(_, node)| node.parent().is_some())
                 .for_each(|(name, node)| {
@@ -113,14 +113,14 @@ impl Model {
             .unwrap()
             .lines()
             .map(|line| line.trim().to_string())
-            .filter(|id| self.nodes.contains_key(&*id))
+            .filter(|id| self.nodes.contains_key(id))
             .collect();
         let mut sorted: Vec<_> = relationships.iter().collect();
         sorted.sort();
         sorted
             .into_iter()
             .map(|id| {
-                let node = self.nodes.get(&*id).unwrap();
+                let node = self.nodes.get(id).unwrap();
                 let mut definitions: Vec<_> = node
                     .relationships
                     .iter()

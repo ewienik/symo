@@ -1,6 +1,5 @@
 use {
     notify::RecursiveMode,
-    notify_debouncer_mini,
     std::{fs, path::Path, sync::mpsc, time::Duration},
 };
 
@@ -24,17 +23,12 @@ pub(crate) fn watch(model: &Path, template: &Path, output: &Path, job: impl Fn()
             .unwrap();
 
         rx.iter().for_each(|e| {
-            if e.unwrap_or(Vec::new())
-                .iter()
-                .map(|e| &e.path)
-                .find(|path| {
-                    path.ancestors()
-                        .take_while(|path| *path != model && *path != template)
-                        .find(|path| *dbg!(path) == output)
-                        .is_none()
-                })
-                .is_some()
-            {
+            if e.unwrap_or_default().iter().map(|e| &e.path).any(|path| {
+                !path
+                    .ancestors()
+                    .take_while(|path| *path != model && *path != template)
+                    .any(|path| *dbg!(path) == output)
+            }) {
                 job();
             }
         });

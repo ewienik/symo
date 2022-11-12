@@ -55,7 +55,7 @@ where
                 .ok()
                 .iter()
                 .filter(|path| (path).is_dir())
-                .find(|path| path.ancestors().find(|path| (*path) == self.base).is_some())
+                .find(|path| path.ancestors().any(|path| (*path) == self.base))
             {
                 Ok(Response::builder()
                     .status(StatusCode::OK)
@@ -92,7 +92,7 @@ where
 }
 
 pub(crate) async fn serve(path: &Path, addr: &SocketAddr) {
-    let server = axum::Server::bind(&addr).serve(
+    let server = axum::Server::bind(addr).serve(
         Router::new()
             .fallback(
                 routing::get_service(
