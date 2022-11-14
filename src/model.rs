@@ -1,5 +1,5 @@
 use {
-    crate::{node::Node, output::Merge, relationship::Relationship},
+    crate::{node::Node, output::Merge, relation::Relation},
     serde::{Deserialize, Serialize},
     std::{
         collections::{BTreeMap, HashSet},
@@ -13,7 +13,7 @@ use {
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct Model {
     #[serde(default)]
-    pub(crate) relationships: BTreeMap<String, Relationship>,
+    pub(crate) relations: BTreeMap<String, Relation>,
     #[serde(default)]
     pub(crate) nodes: BTreeMap<String, Node>,
     #[serde(default)]
@@ -69,20 +69,20 @@ impl Model {
             .map(|item| item.into_path())
             .fold(
                 Self {
-                    relationships: BTreeMap::new(),
+                    relations: BTreeMap::new(),
                     nodes: BTreeMap::new(),
                     diagrams: BTreeMap::new(),
                 },
                 |mut acc, item| {
                     let mut model: Self =
                         serde_yaml::from_reader(File::open(item).unwrap()).unwrap();
-                    acc.relationships.append(&mut model.relationships);
+                    acc.relations.append(&mut model.relations);
                     acc.nodes.append(&mut model.nodes);
                     acc.diagrams.append(&mut model.diagrams);
                     acc
                 },
             );
-        merge(&mut model.relationships);
+        merge(&mut model.relations);
         merge(&mut model.nodes);
         model.nodes = model
             .nodes
@@ -90,7 +90,7 @@ impl Model {
             .into_iter()
             .map(|(id, mut node)| {
                 node.id = Some(id.clone());
-                node.merge_relationships(&id, &model);
+                node.merge_relations(&id, &model);
                 (id, node)
             })
             .collect();
@@ -99,7 +99,7 @@ impl Model {
             .clone()
             .into_iter()
             .map(|(id, mut node)| {
-                node.merge_relationships_with_parent(&id, &model);
+                node.merge_relations_with_parent(&id, &model);
                 (id, node)
             })
             .collect();
@@ -107,7 +107,7 @@ impl Model {
     }
 
     pub(crate) fn diagram_definitions(&self, diagram: &String) -> String {
-        let relationships: HashSet<_> = self
+        let relations: HashSet<_> = self
             .diagrams
             .get(diagram)
             .unwrap()
@@ -115,21 +115,21 @@ impl Model {
             .map(|line| line.trim().to_string())
             .filter(|id| self.nodes.contains_key(id))
             .collect();
-        let mut sorted: Vec<_> = relationships.iter().collect();
+        let mut sorted: Vec<_> = relations.iter().collect();
         sorted.sort();
         sorted
             .into_iter()
             .map(|id| {
                 let node = self.nodes.get(id).unwrap();
                 let mut definitions: Vec<_> = node
-                    .relationships
+                    .relations
                     .iter()
                     .flat_map(|map| map.iter())
-                    .filter(|(_, relationship)| {
-                        let right = relationship.right.as_ref().unwrap();
-                        relationships.contains(right) && self.nodes.contains_key(right)
+                    .filter(|(_, relation)| {
+                        let right = relation.right.as_ref().unwrap();
+                        relations.contains(right) && self.nodes.contains_key(right)
                     })
-                    .filter_map(|(_, relationship)| relationship.definition.as_ref())
+                    .filter_map(|(_, relation)| relation.definition.as_ref())
                     .collect();
                 definitions.sort();
                 definitions

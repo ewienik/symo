@@ -1,4 +1,4 @@
-relationships:
+relations:
   base:
     definition: '{{left}} -.->|"{{description}}{{#if technology}}\n[{{technology}}]{{/if}}"| {{right}}'
 

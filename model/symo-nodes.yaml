@@ -20,7 +20,7 @@ nodes:
     name: symo
     technology: Rust
     description: Symo tool
-    relationships:
+    relations:
       dir-model:
         parent: uses
       dir-template:
@@ -32,7 +32,7 @@ nodes:
     parent: template-person
     name: User
     description: The User of the symo tool
-    relationships:
+    relations:
       tool:
         parent: uses
 
