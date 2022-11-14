@@ -6,7 +6,7 @@ use {
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct Relationship {
+pub(crate) struct Relation {
     pub(crate) parent: Option<String>,
     pub(crate) left: Option<String>,
     pub(crate) right: Option<String>,
@@ -15,7 +15,7 @@ pub(crate) struct Relationship {
     pub(crate) definition: Option<String>,
 }
 
-impl Merge for Relationship {
+impl Merge for Relation {
     fn parent(&self) -> Option<String> {
         self.parent.clone()
     }
@@ -36,7 +36,7 @@ impl Merge for Relationship {
     }
 }
 
-impl Relationship {
+impl Relation {
     pub(crate) fn render_definition(&mut self, handlebars: &Handlebars) {
         self.definition = Some(
             handlebars

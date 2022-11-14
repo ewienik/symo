@@ -1,5 +1,5 @@
 use {
-    crate::{model::Model, output::Merge, relationship::Relationship},
+    crate::{model::Model, output::Merge, relation::Relation},
     anyhow::Context,
     handlebars::Handlebars,
     serde::{Deserialize, Serialize},
@@ -13,7 +13,7 @@ pub(crate) struct Node {
     pub(crate) name: Option<String>,
     pub(crate) description: Option<String>,
     pub(crate) technology: Option<String>,
-    pub(crate) relationships: Option<BTreeMap<String, Relationship>>,
+    pub(crate) relations: Option<BTreeMap<String, Relation>>,
     pub(crate) definition: Option<String>,
 }
 
@@ -39,44 +39,41 @@ impl Merge for Node {
 }
 
 impl Node {
-    pub(crate) fn merge_relationships(&mut self, id: &str, model: &Model) {
-        if let Some(relationships) = &mut self.relationships {
-            relationships
+    pub(crate) fn merge_relations(&mut self, id: &str, model: &Model) {
+        if let Some(relations) = &mut self.relations {
+            relations
                 .iter_mut()
                 .filter(|(_, child)| child.parent.is_some())
-                .filter_map(|(id_relationship, child)| {
-                    if let Some(parent) = model.relationships.get(&child.parent().unwrap()) {
-                        Some((id_relationship, child, parent))
+                .filter_map(|(id_relation, child)| {
+                    if let Some(parent) = model.relations.get(&child.parent().unwrap()) {
+                        Some((id_relation, child, parent))
                     } else {
-                        println!(
-                            "Unknown parent for node {} relationship {}",
-                            id, id_relationship
-                        );
+                        println!("Unknown parent for node {} relation {}", id, id_relation);
                         None
                     }
                 })
-                .for_each(|(id_relationship, child, parent)| {
+                .for_each(|(id_relation, child, parent)| {
                     child.left = Some(id.to_string());
-                    child.right = Some(id_relationship.clone());
+                    child.right = Some(id_relation.clone());
                     child.merge(parent);
                 });
         };
     }
 
-    pub(crate) fn merge_relationships_with_parent(&mut self, id: &str, model: &Model) {
-        let parent_relationships = self
+    pub(crate) fn merge_relations_with_parent(&mut self, id: &str, model: &Model) {
+        let parent_relations = self
             .parent()
             .into_iter()
             .filter_map(|parent| model.nodes.get(&parent))
-            .filter_map(|parent| parent.relationships.as_ref())
+            .filter_map(|parent| parent.relations.as_ref())
             .flatten();
-        if let Some(relationships) = &mut self.relationships {
-            parent_relationships.for_each(|(id_relationship, parent)| {
-                if let Some(child) = relationships.get_mut(id_relationship) {
+        if let Some(relations) = &mut self.relations {
+            parent_relations.for_each(|(id_relation, parent)| {
+                if let Some(child) = relations.get_mut(id_relation) {
                     child.left = Some(id.to_string());
                     child.merge(parent);
                 } else {
-                    relationships.insert(id_relationship.clone(), parent.clone());
+                    relations.insert(id_relation.clone(), parent.clone());
                 }
             });
         };
@@ -94,10 +91,7 @@ impl Node {
                         .clone(),
                     self,
                 )
-                .context(format!(
-                    "failed render definition for {:?} relationship",
-                    self
-                ))
+                .context(format!("failed render definition for {:?} relation", self))
                 .unwrap(),
         );
     }

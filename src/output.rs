@@ -30,10 +30,10 @@ fn new_data(handlebars: &Handlebars, mut model: Model) -> BTreeMap<String, Strin
         .iter_mut()
         .filter_map(|(_, node)| {
             node.render_definition(handlebars);
-            node.relationships.as_mut()
+            node.relations.as_mut()
         })
-        .flat_map(|relationships| relationships.iter_mut())
-        .for_each(|(_, relationship)| relationship.render_definition(handlebars));
+        .flat_map(|relations| relations.iter_mut())
+        .for_each(|(_, relation)| relation.render_definition(handlebars));
     model
         .diagrams
         .iter()

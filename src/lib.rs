@@ -1,7 +1,7 @@
 mod model;
 mod node;
 mod output;
-mod relationship;
+mod relation;
 mod serve;
 mod watch;
 
