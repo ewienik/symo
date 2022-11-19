@@ -1,13 +1,12 @@
 use {
-    crate::output::Merge,
-    anyhow::Context,
+    crate::{output::Merge, Error, Result},
     handlebars::Handlebars,
     serde::{Deserialize, Serialize},
     std::collections::HashSet,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct Relation {
+pub struct Relation {
     pub(crate) parent: Option<String>,
     pub(crate) tags: Option<HashSet<String>>,
     pub(crate) left: Option<String>,
@@ -44,18 +43,15 @@ impl Merge for Relation {
 }
 
 impl Relation {
-    pub(crate) fn render_definition(&mut self, handlebars: &Handlebars) {
+    pub(crate) fn render_definition(&mut self, handlebars: &Handlebars) -> Result<()> {
         self.definition = Some(
-            handlebars
-                .render_template(
-                    self.definition
-                        .as_ref()
-                        .context(format!("no definition for {:?}", self))
-                        .unwrap(),
-                    self,
-                )
-                .context(format!("failed render definition for {:?}", self))
-                .unwrap(),
-        )
+            handlebars.render_template(
+                self.definition
+                    .as_ref()
+                    .ok_or_else(|| Error::RelationHasNoDefinition(self.clone()))?,
+                self,
+            )?,
+        );
+        Ok(())
     }
 }

@@ -1,9 +1,15 @@
 use {
+    crate::Result,
     notify::RecursiveMode,
     std::{fs, path::Path, sync::mpsc, time::Duration},
 };
 
-pub(crate) fn watch(model: &Path, template: &Path, output: &Path, job: impl Fn() + Send + 'static) {
+pub(crate) fn watch(
+    model: &Path,
+    template: &Path,
+    output: &Path,
+    job: impl Fn() -> Result<()> + Send + 'static,
+) {
     let model = fs::canonicalize(model).unwrap();
     let template = fs::canonicalize(template).unwrap();
     let output = fs::canonicalize(output).unwrap();
@@ -29,7 +35,9 @@ pub(crate) fn watch(model: &Path, template: &Path, output: &Path, job: impl Fn()
                     .take_while(|path| *path != model && *path != template)
                     .any(|path| *path == output)
             }) {
-                job();
+                if let Err(err) = job() {
+                    eprintln!("error processing: {err}");
+                }
             }
         });
     });

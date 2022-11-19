@@ -9,7 +9,6 @@ homepage = "https://github.com/ewienik/symo"
 repository = "https://github.com/ewienik/symo"
 
 [dependencies]
-anyhow = "*"
 axum = "*"
 clap = { version = "*", features = ["derive"] }
 handlebars = "*"
@@ -17,6 +16,7 @@ notify = "*"
 notify-debouncer-mini = { version = "*", default-features = false }
 serde = { version = "*", features = ["derive"] }
 serde_yaml = "*"
+thiserror = "*"
 tokio = { version = "*", features = ["full"] }
 tower = "*"
 tower-http = { version = "*", features = ["fs"] }
