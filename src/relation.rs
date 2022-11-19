@@ -3,11 +3,13 @@ use {
     anyhow::Context,
     handlebars::Handlebars,
     serde::{Deserialize, Serialize},
+    std::collections::HashSet,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct Relation {
     pub(crate) parent: Option<String>,
+    pub(crate) tags: Option<HashSet<String>>,
     pub(crate) left: Option<String>,
     pub(crate) right: Option<String>,
     pub(crate) description: Option<String>,
@@ -21,6 +23,11 @@ impl Merge for Relation {
     }
 
     fn merge(&mut self, parent: &Self) {
+        if self.tags.is_none() {
+            self.tags = parent.tags.clone();
+        } else if parent.tags.is_some() {
+            self.tags = Some(self.tags.as_ref().unwrap() | parent.tags.as_ref().unwrap());
+        }
         if self.right.is_none() {
             self.right = parent.right.clone();
         }

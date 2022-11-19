@@ -27,7 +27,7 @@ pub(crate) fn watch(model: &Path, template: &Path, output: &Path, job: impl Fn()
                 !path
                     .ancestors()
                     .take_while(|path| *path != model && *path != template)
-                    .any(|path| *dbg!(path) == output)
+                    .any(|path| *path == output)
             }) {
                 job();
             }

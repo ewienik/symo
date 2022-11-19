@@ -4,16 +4,34 @@ nodes:
     parent: template-dir
     name: YAML model
     description: 'Directory with yaml model files'
+    relations:
+      tool-model:
+        - parent: dataflow
+          description: YAML files
+      tool-watch:
+        - parent: dataflow
+          description: files change info
 
   dir-template:
     parent: template-dir
     name: template docs
     description: 'Directory with template markdown files'
+    relations:
+      tool-output:
+        - parent: dataflow
+          description: Markdown template files
+      tool-watch:
+        - parent: dataflow
+          description: files change info
 
   dir-docs:
     parent: template-dir
     name: out docs
     description: 'Directory with output markdown files'
+    relations:
+      tool-serve:
+        - parent: dataflow
+          description: Context of files
 
   tool:
     parent: template-container
@@ -21,12 +39,76 @@ nodes:
     technology: Rust
     description: Symo tool
     relations:
-      dir-model:
-        parent: uses
-      dir-template:
-        parent: uses
       dir-docs:
-        parent: updates
+        - parent: updates
+      dir-model:
+        - parent: uses
+      dir-template:
+        - parent: uses
+
+  tool-model:
+    parent: template-component
+    name: Model
+    technology: Rust
+    description: Create & maintain model
+    relations:
+      dir-model:
+        - parent: uses
+      tool-output:
+        - parent: dataflow
+          description: Model data
+
+  tool-output:
+    parent: template-component
+    name: Output
+    technology: Rust
+    description: Create output files
+    relations:
+      dir-docs:
+        - parent: updates
+        - parent: dataflow
+          description: Markdown files
+      dir-template:
+        - parent: uses
+
+  tool-run:
+    parent: template-component
+    name: Run
+    technology: Rust
+    description: Main loop for a tool
+    relations:
+      tool-model:
+        - parent: creates
+      tool-output:
+        - parent: creates
+      tool-serve:
+        - parent: creates
+      tool-watch:
+        - parent: creates
+
+  tool-serve:
+    parent: template-component
+    name: Serve
+    technology: Rust
+    description: Static http server for docs directory
+    relations:
+      dir-docs:
+        - parent: uses
+
+  tool-watch:
+    parent: template-component
+    name: Watch
+    technology: Rust
+    description: Watch for changes in modules or templates
+    relations:
+      dir-model:
+        - parent: uses
+      dir-template:
+        - parent: uses
+      tool-model:
+        - parent: creates
+      tool-output:
+        - parent: creates
 
   user:
     parent: template-person
@@ -34,5 +116,5 @@ nodes:
     description: The User of the symo tool
     relations:
       tool:
-        parent: uses
+        - parent: uses
 

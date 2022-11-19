@@ -106,8 +106,8 @@ impl Model {
         model
     }
 
-    pub(crate) fn diagram_definitions(&self, diagram: &String) -> String {
-        let relations: HashSet<_> = self
+    pub(crate) fn diagram_definitions(&self, diagram: &str, tags: HashSet<String>) -> String {
+        let diagram_nodes: HashSet<_> = self
             .diagrams
             .get(diagram)
             .unwrap()
@@ -115,9 +115,9 @@ impl Model {
             .map(|line| line.trim().to_string())
             .filter(|id| self.nodes.contains_key(id))
             .collect();
-        let mut sorted: Vec<_> = relations.iter().collect();
-        sorted.sort();
-        sorted
+        let mut sorted_diagram_nodes: Vec<_> = diagram_nodes.iter().collect();
+        sorted_diagram_nodes.sort();
+        sorted_diagram_nodes
             .into_iter()
             .map(|id| {
                 let node = self.nodes.get(id).unwrap();
@@ -125,11 +125,17 @@ impl Model {
                     .relations
                     .iter()
                     .flat_map(|map| map.iter())
-                    .filter(|(_, relation)| {
-                        let right = relation.right.as_ref().unwrap();
-                        relations.contains(right) && self.nodes.contains_key(right)
+                    .flat_map(|(_, relations)| relations.iter())
+                    .filter(|relation| {
+                        tags.is_empty()
+                            || relation.tags.is_some()
+                                && !relation.tags.as_ref().unwrap().is_disjoint(&tags)
                     })
-                    .filter_map(|(_, relation)| relation.definition.as_ref())
+                    .filter(|relation| {
+                        let right = relation.right.as_ref().unwrap();
+                        diagram_nodes.contains(right) && self.nodes.contains_key(right)
+                    })
+                    .filter_map(|relation| relation.definition.as_ref())
                     .collect();
                 definitions.sort();
                 definitions

@@ -1,14 +1,15 @@
 use {
     crate::model::Model,
-    handlebars::Handlebars,
+    handlebars::{Context, Handlebars, Helper, HelperResult, Output, RenderContext},
     serde::Serialize,
     std::{
-        collections::BTreeMap,
+        collections::{BTreeMap, HashSet},
         ffi::OsString,
         fs::{self, File},
         io::Write,
         iter,
         path::Path,
+        sync::Arc,
     },
     walkdir::WalkDir,
 };
@@ -24,16 +25,50 @@ fn new_handlebars<'a>() -> Handlebars<'a> {
     handlebars
 }
 
-fn new_data(handlebars: &Handlebars, mut model: Model) -> BTreeMap<String, String> {
+fn new_data(mut handlebars: Handlebars, mut model: Model) -> BTreeMap<String, String> {
     model
         .nodes
         .iter_mut()
         .filter_map(|(_, node)| {
-            node.render_definition(handlebars);
+            node.render_definition(&handlebars);
             node.relations.as_mut()
         })
         .flat_map(|relations| relations.iter_mut())
-        .for_each(|(_, relation)| relation.render_definition(handlebars));
+        .flat_map(|(_, relations)| relations.iter_mut())
+        .for_each(|relation| relation.render_definition(&handlebars));
+
+    let model = Arc::new(model);
+    handlebars.register_helper(
+        "definitions",
+        Box::new({
+            let model = Arc::clone(&model);
+            move |h: &Helper,
+                  _r: &Handlebars,
+                  ctx: &Context,
+                  _rc: &mut RenderContext,
+                  out: &mut dyn Output|
+                  -> HelperResult {
+                let tags: HashSet<_> = h
+                    .params()
+                    .iter()
+                    .filter_map(|v| v.relative_path())
+                    .map(|v| v.to_string())
+                    .collect();
+                let name = ctx
+                    .data()
+                    .as_object()
+                    .unwrap()
+                    .get("diagram-name")
+                    .unwrap()
+                    .as_str()
+                    .unwrap();
+
+                out.write(&model.diagram_definitions(name, tags))?;
+                Ok(())
+            }
+        }),
+    );
+
     model
         .diagrams
         .iter()
@@ -43,7 +78,7 @@ fn new_data(handlebars: &Handlebars, mut model: Model) -> BTreeMap<String, Strin
                 handlebars
                     .render_template(
                         definition,
-                        &iter::once(("definitions".to_string(), model.diagram_definitions(name)))
+                        &iter::once(("diagram-name".to_string(), name.clone()))
                             .chain(model.nodes.iter().filter_map(|(id, node)| {
                                 node.name
                                     .as_ref()
@@ -79,8 +114,8 @@ where
 }
 
 pub fn build(model: &Path, template: &Path, output: &Path) {
+    let data = new_data(new_handlebars(), Model::new(model));
     let handlebars = new_handlebars();
-    let data = new_data(&handlebars, Model::new(model));
     WalkDir::new(template)
         .into_iter()
         .filter_map(|item| item.ok())

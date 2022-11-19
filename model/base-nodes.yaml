@@ -5,6 +5,9 @@ nodes:
   template-software-system:
     definition: '{{id}}("{{name}}<br/>[Software System]<br/><br/>{{{description}}}")'
 
+  template-component:
+    definition: '{{id}}["{{name}}<br/>[Component{{#if technology}}: {{technology}}{{/if}}]{{#if description}}<br/><br/>{{{description}}}{{/if}}"]'
+
   template-container:
     definition: '{{id}}["{{name}}<br/>[Container{{#if technology}}: {{technology}}{{/if}}]{{#if description}}<br/><br/>{{{description}}}{{/if}}"]'
 
