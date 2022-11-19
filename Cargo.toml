@@ -12,6 +12,7 @@ repository = "https://github.com/ewienik/symo"
 axum = "*"
 clap = { version = "*", features = ["derive"] }
 handlebars = "*"
+hyper = "*"
 notify = "*"
 notify-debouncer-mini = { version = "*", default-features = false }
 serde = { version = "*", features = ["derive"] }
@@ -21,3 +22,7 @@ tokio = { version = "*", features = ["full"] }
 tower = "*"
 tower-http = { version = "*", features = ["fs"] }
 walkdir = "*"
+
+[dev-dependencies]
+similar = "*"
+tempfile = "*"

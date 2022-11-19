@@ -7,13 +7,13 @@ use {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Relation {
-    pub(crate) parent: Option<String>,
-    pub(crate) tags: Option<HashSet<String>>,
-    pub(crate) left: Option<String>,
-    pub(crate) right: Option<String>,
-    pub(crate) description: Option<String>,
-    pub(crate) technology: Option<String>,
-    pub(crate) definition: Option<String>,
+    pub parent: Option<String>,
+    pub tags: Option<HashSet<String>>,
+    pub left: Option<String>,
+    pub right: Option<String>,
+    pub description: Option<String>,
+    pub technology: Option<String>,
+    pub definition: Option<String>,
 }
 
 impl Merge for Relation {

@@ -1,4 +1,5 @@
 use {
+    crate::Result,
     axum::{
         http::{Request, Response, StatusCode},
         response::IntoResponse,
@@ -27,7 +28,7 @@ struct DirListingService {
 }
 
 impl DirListingService {
-    pub fn new(base: &Path) -> Self {
+    fn new(base: &Path) -> Self {
         Self {
             base: base.canonicalize().unwrap(),
         }
@@ -40,9 +41,9 @@ where
 {
     type Response = Response<String>;
     type Error = std::io::Error;
-    type Future = Ready<Result<Self::Response, Self::Error>>;
+    type Future = Ready<std::result::Result<Self::Response, Self::Error>>;
 
-    fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+    fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<std::result::Result<(), Self::Error>> {
         Poll::Ready(Ok(()))
     }
 
@@ -91,7 +92,7 @@ where
     }
 }
 
-pub(crate) async fn serve(path: &Path, addr: &SocketAddr) {
+pub(crate) async fn serve(path: &Path, addr: &SocketAddr) -> Result<()> {
     let server = axum::Server::bind(addr).serve(
         Router::new()
             .fallback(
@@ -106,5 +107,6 @@ pub(crate) async fn serve(path: &Path, addr: &SocketAddr) {
     );
     println!("listening on http://{}", server.local_addr());
 
-    server.await.unwrap();
+    server.await?;
+    Ok(())
 }
