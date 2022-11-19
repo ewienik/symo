@@ -7,13 +7,13 @@ use {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
-    pub(crate) id: Option<String>,
-    pub(crate) parent: Option<String>,
-    pub(crate) name: Option<String>,
-    pub(crate) description: Option<String>,
-    pub(crate) technology: Option<String>,
-    pub(crate) relations: Option<BTreeMap<String, Vec<Relation>>>,
-    pub(crate) definition: Option<String>,
+    pub id: Option<String>,
+    pub parent: Option<String>,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub technology: Option<String>,
+    pub relations: Option<BTreeMap<String, Vec<Relation>>>,
+    pub definition: Option<String>,
 }
 
 impl Merge for Node {

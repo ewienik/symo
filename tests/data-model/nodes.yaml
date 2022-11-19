@@ -1,0 +1,46 @@
+nodes:
+  template0:
+    definition: 'node-template0: {{id}}, {{name}}, {{{description}}}'
+
+  template1:
+    definition: 'node-template1: {{id}}, {{name}}, {{{description}}}'
+
+  node0:
+    parent: template0
+    name: node0
+    description: node0-description
+
+  node1:
+    parent: template1
+    name: node1
+    description: node1-description
+
+  node2:
+    parent: template1
+    name: node2
+    description: node2-description
+
+  node0-0:
+    parent: node0
+    name: node0-0
+    description: node0-0-description
+    relations:
+      node2:
+        - parent: base-tag0
+          description: node0-0-node2-tag0
+      node1:
+        - parent: base-tag1
+          description: node0-0-node1-tag1
+
+  node1-0:
+    parent: node1
+    name: node1-0
+    description: node1-0-description
+    relations:
+      node2:
+        - parent: base-tag1
+          description: node1-0-node2-tag1
+      node0:
+        - parent: base-tag0
+          description: node1-0-node1-tag0
+

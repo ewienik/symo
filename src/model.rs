@@ -11,13 +11,13 @@ use {
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Model {
+pub struct Model {
     #[serde(default)]
-    pub(crate) relations: BTreeMap<String, Relation>,
+    pub relations: BTreeMap<String, Relation>,
     #[serde(default)]
-    pub(crate) nodes: BTreeMap<String, Node>,
+    pub nodes: BTreeMap<String, Node>,
     #[serde(default)]
-    pub(crate) diagrams: BTreeMap<String, String>,
+    pub diagrams: BTreeMap<String, String>,
 }
 
 fn merge<T: Merge>(map: &mut BTreeMap<String, T>) -> Result<()> {
@@ -65,7 +65,7 @@ fn merge<T: Merge>(map: &mut BTreeMap<String, T>) -> Result<()> {
 }
 
 impl Model {
-    pub(crate) fn new(path: &Path) -> Result<Self> {
+    pub fn new(path: &Path) -> Result<Self> {
         let mut model: Self = WalkDir::new(path)
             .into_iter()
             .filter_map(|item| item.ok())

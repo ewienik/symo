@@ -14,6 +14,12 @@ pub(crate) fn watch(
     let template = fs::canonicalize(template).unwrap();
     let output = fs::canonicalize(output).unwrap();
     std::thread::spawn(move || {
+        let process = || {
+            if let Err(err) = job() {
+                eprintln!("error processing: {err}");
+            }
+        };
+
         let (tx, rx) = mpsc::channel();
 
         let mut debouncer =
@@ -28,6 +34,8 @@ pub(crate) fn watch(
             .watch(&template, RecursiveMode::Recursive)
             .unwrap();
 
+        process();
+
         rx.iter().for_each(|e| {
             if e.unwrap_or_default().iter().map(|e| &e.path).any(|path| {
                 !path
@@ -35,9 +43,7 @@ pub(crate) fn watch(
                     .take_while(|path| *path != model && *path != template)
                     .any(|path| *path == output)
             }) {
-                if let Err(err) = job() {
-                    eprintln!("error processing: {err}");
-                }
+                process();
             }
         });
     });

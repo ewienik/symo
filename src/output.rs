@@ -131,7 +131,7 @@ where
     Ok(())
 }
 
-pub fn build(model: &Path, template: &Path, output: &Path) -> Result<()> {
+pub(crate) fn build(model: &Path, template: &Path, output: &Path) -> Result<()> {
     let data = render_diagrams(new_handlebars(), Model::new(model)?)?;
     let handlebars = new_handlebars();
     WalkDir::new(template)

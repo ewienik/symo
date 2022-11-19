@@ -1,0 +1,8 @@
+relations:
+  base-tag0:
+    definition: 'relation-tag0: {{left}}, {{description}}, {{technology}}, {{right}}'
+    tags: [tag0]
+
+  base-tag1:
+    definition: 'relation-tag1: {{left}}, {{description}}, {{technology}}, {{right}}'
+    tags: [tag1]

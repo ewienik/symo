@@ -5,53 +5,27 @@ mod relation;
 mod serve;
 mod watch;
 
-use {
-    crate::{node::Node, relation::Relation},
-    clap::Parser,
-    handlebars::RenderError,
-    std::{ffi::OsString, io, net::SocketAddr, path::PathBuf},
-};
+pub use crate::{model::Model, node::Node, relation::Relation};
 
-#[derive(Parser)]
-#[clap(about, version)]
-struct Args {
-    model: PathBuf,
-    template: PathBuf,
-    output: PathBuf,
+use std::{net::SocketAddr, path::Path};
 
-    #[clap(short, long)]
-    serve: bool,
-
-    #[clap(short, long, default_value = "127.0.0.1:0")]
-    addr: SocketAddr,
+pub fn run_one_time(model: &Path, template: &Path, output: &Path) -> Result<()> {
+    output::build(model, template, output)
 }
 
-pub async fn run<A, S>(args: A) -> Result<()>
-where
-    A: IntoIterator<Item = S>,
-    S: Into<OsString> + Clone,
-{
-    let args = Args::parse_from(args);
-
-    if let Err(err) = output::build(&args.model, &args.template, &args.output) {
-        if !args.serve {
-            return Err(err);
-        }
-        eprintln!("starting process error: {err:?}");
-    }
-
-    if !args.serve {
-        return Ok(());
-    }
-
-    watch::watch(&args.model, &args.template, &args.output, {
-        let model = args.model.clone();
-        let template = args.template.clone();
-        let output = args.output.clone();
+pub async fn run_serve(
+    model: &Path,
+    template: &Path,
+    output: &Path,
+    addr: &SocketAddr,
+) -> Result<()> {
+    watch::watch(model, template, output, {
+        let model = model.to_path_buf();
+        let template = template.to_path_buf();
+        let output = output.to_path_buf();
         move || output::build(&model, &template, &output)
     });
-    serve::serve(&args.output, &args.addr).await;
-    Ok(())
+    serve::serve(output, addr).await
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -73,13 +47,13 @@ pub enum Error {
     #[error("render error: {source:?}")]
     RenderError {
         #[from]
-        source: RenderError,
+        source: handlebars::RenderError,
     },
 
     #[error("io error: {source:?}")]
     Io {
         #[from]
-        source: io::Error,
+        source: std::io::Error,
     },
 
     #[error("yaml error: {source:?}")]
@@ -87,10 +61,16 @@ pub enum Error {
         #[from]
         source: serde_yaml::Error,
     },
+
+    #[error("hyper error: {source:?}")]
+    Hyper {
+        #[from]
+        source: hyper::Error,
+    },
 }
 
-impl std::convert::From<Error> for RenderError {
+impl std::convert::From<Error> for handlebars::RenderError {
     fn from(err: Error) -> Self {
-        RenderError::from_error(&err.to_string(), err)
+        handlebars::RenderError::from_error(&err.to_string(), err)
     }
 }
