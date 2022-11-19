@@ -1,13 +1,12 @@
 use {
-    crate::{model::Model, output::Merge, relation::Relation},
-    anyhow::Context,
+    crate::{model::Model, output::Merge, relation::Relation, Error, Result},
     handlebars::Handlebars,
     serde::{Deserialize, Serialize},
     std::collections::BTreeMap,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct Node {
+pub struct Node {
     pub(crate) id: Option<String>,
     pub(crate) parent: Option<String>,
     pub(crate) name: Option<String>,
@@ -39,7 +38,8 @@ impl Merge for Node {
 }
 
 impl Node {
-    pub(crate) fn merge_relations(&mut self, id: &str, model: &Model) {
+    pub(crate) fn merge_relations(&mut self, id: &str, model: &Model) -> Result<()> {
+        let mut errors = vec![];
         if let Some(relations) = &mut self.relations {
             relations
                 .iter_mut()
@@ -50,10 +50,13 @@ impl Node {
                 })
                 .filter(|(_, child)| child.parent.is_some())
                 .filter_map(|(id_relation, child)| {
-                    if let Some(parent) = model.relations.get(&child.parent().unwrap()) {
+                    let id_parent = child
+                        .parent()
+                        .unwrap_or_else(|| "(not defined)".to_string());
+                    if let Some(parent) = model.relations.get(&id_parent) {
                         Some((id_relation, child, parent))
                     } else {
-                        println!("Unknown parent for node {} relation {}", id, id_relation);
+                        errors.push((id.to_owned(), id_relation, id_parent));
                         None
                     }
                 })
@@ -63,6 +66,11 @@ impl Node {
                     child.merge(parent);
                 });
         };
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(Error::NodeRelationHasUnknownParent { list: errors })
+        }
     }
 
     pub(crate) fn merge_relations_with_parent(&mut self, id: &str, model: &Model) {
@@ -98,20 +106,17 @@ impl Node {
         };
     }
 
-    pub(crate) fn render_definition(&mut self, handlebars: &Handlebars) {
+    pub(crate) fn render_definition(&mut self, handlebars: &Handlebars) -> Result<()> {
         self.definition = Some(
-            handlebars
-                .render_template(
-                    &self
-                        .definition
-                        .as_ref()
-                        .context(format!("no definition for {:?}", self))
-                        .unwrap()
-                        .clone(),
-                    self,
-                )
-                .context(format!("failed render definition for {:?} relation", self))
-                .unwrap(),
+            handlebars.render_template(
+                &self
+                    .definition
+                    .as_ref()
+                    .ok_or_else(|| Error::NodeHasNoDefinition(self.clone()))?
+                    .clone(),
+                self,
+            )?,
         );
+        Ok(())
     }
 }
