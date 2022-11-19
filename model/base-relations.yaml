@@ -1,11 +1,20 @@
 relations:
-  base:
+  base-c4model:
     definition: '{{left}} -.->|"{{description}}{{#if technology}}\n[{{technology}}]{{/if}}"| {{right}}'
+    tags: [c4model]
+
+  dataflow:
+    definition: '{{left}} ==>|"{{description}}"| {{right}}'
+    tags: [dataflow]
+
+  creates:
+    parent: base-c4model
+    description: Creates
 
   updates:
-    parent: base
+    parent: base-c4model
     description: Updates
 
   uses:
-    parent: base
+    parent: base-c4model
     description: Uses

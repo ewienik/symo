@@ -2,12 +2,86 @@ diagrams:
   overall-concept: |
     ```mermaid
     flowchart LR
+
     user
     dir-model
     dir-template
     tool
     dir-docs
 
-    {{{definitions}}}
+    {{{definitions c4model}}}
     ```
 
+  components-one-time-mode: |
+    ```mermaid
+    flowchart LR
+
+    dir-model
+    dir-template
+
+    subgraph "symo"
+      tool-run
+      tool-model
+      tool-output
+    end
+
+    dir-docs
+
+    {{{definitions c4model}}}
+    ```
+
+  components-serve-mode: |
+    ```mermaid
+    flowchart LR
+
+    dir-model
+    dir-template
+
+    subgraph "symo"
+      tool-run
+      tool-model
+      tool-output
+      tool-watch
+      tool-serve
+    end
+
+    dir-docs
+
+    {{{definitions c4model}}}
+    ```
+
+  dataflow-one-time-mode: |
+    ```mermaid
+    flowchart LR
+
+    dir-model
+    dir-template
+
+    subgraph "symo"
+      tool-model
+      tool-output
+    end
+
+    dir-docs
+
+    {{{definitions dataflow}}}
+    ```
+
+  dataflow-serve-mode: |
+    ```mermaid
+    flowchart LR
+
+    dir-model
+    dir-template
+
+    subgraph "symo"
+      tool-model
+      tool-output
+      tool-watch
+      tool-serve
+    end
+
+    dir-docs
+
+    {{{definitions dataflow}}}
+    ```

@@ -13,7 +13,7 @@ pub(crate) struct Node {
     pub(crate) name: Option<String>,
     pub(crate) description: Option<String>,
     pub(crate) technology: Option<String>,
-    pub(crate) relations: Option<BTreeMap<String, Relation>>,
+    pub(crate) relations: Option<BTreeMap<String, Vec<Relation>>>,
     pub(crate) definition: Option<String>,
 }
 
@@ -43,6 +43,11 @@ impl Node {
         if let Some(relations) = &mut self.relations {
             relations
                 .iter_mut()
+                .flat_map(|(id_relation, child)| {
+                    child
+                        .iter_mut()
+                        .map(|child| (id_relation.to_owned(), child))
+                })
                 .filter(|(_, child)| child.parent.is_some())
                 .filter_map(|(id_relation, child)| {
                     if let Some(parent) = model.relations.get(&child.parent().unwrap()) {
@@ -54,7 +59,7 @@ impl Node {
                 })
                 .for_each(|(id_relation, child, parent)| {
                     child.left = Some(id.to_string());
-                    child.right = Some(id_relation.clone());
+                    child.right = Some(id_relation);
                     child.merge(parent);
                 });
         };
@@ -68,14 +73,28 @@ impl Node {
             .filter_map(|parent| parent.relations.as_ref())
             .flatten();
         if let Some(relations) = &mut self.relations {
-            parent_relations.for_each(|(id_relation, parent)| {
-                if let Some(child) = relations.get_mut(id_relation) {
-                    child.left = Some(id.to_string());
-                    child.merge(parent);
-                } else {
-                    relations.insert(id_relation.clone(), parent.clone());
-                }
-            });
+            parent_relations
+                .flat_map(|(id_relation, parent)| {
+                    parent.iter().map(|parent| (id_relation.to_owned(), parent))
+                })
+                .for_each(|(id_relation, parent)| {
+                    if let Some(children) = relations.get_mut(&id_relation) {
+                        if let Some(child) = children.iter_mut().find(|child| {
+                            child
+                                .parent
+                                .as_ref()
+                                .map(|relation_parent| relation_parent == &id_relation)
+                                .unwrap_or(false)
+                        }) {
+                            child.left = Some(id.to_string());
+                            child.merge(parent);
+                        } else {
+                            children.push(parent.clone());
+                        }
+                    } else {
+                        relations.insert(id_relation.clone(), vec![parent.clone()]);
+                    }
+                });
         };
     }
 

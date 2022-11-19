@@ -38,12 +38,13 @@ Serve with watch and listening addr:
 symo dir-with-models dir-with-docs-templates dir-output -s -a localhost:8000
 ```
 
-## Desing
+## Design
 
-The Concept of symo
+The Concept of symo:
 
 ```mermaid
 flowchart LR
+
 user
 dir-model
 dir-template
@@ -60,6 +61,142 @@ tool -.->|"Uses"| dir-model
 tool -.->|"Uses"| dir-template
 user(("User<br/>[Person]<br/><br/>The User of the symo tool"))
 user -.->|"Uses"| tool
+```
+
+
+Components for one time run mode:
+
+```mermaid
+flowchart LR
+
+dir-model
+dir-template
+
+subgraph "symo"
+  tool-run
+  tool-model
+  tool-output
+end
+
+dir-docs
+
+
+dir-docs[("out docs<br/>[Container: Dir]<br/><br/>Directory with output markdown files")]
+dir-model[("YAML model<br/>[Container: Dir]<br/><br/>Directory with yaml model files")]
+dir-template[("template docs<br/>[Container: Dir]<br/><br/>Directory with template markdown files")]
+tool-model["Model<br/>[Component: Rust]<br/><br/>Create & maintain model"]
+tool-model -.->|"Uses"| dir-model
+tool-output["Output<br/>[Component: Rust]<br/><br/>Create output files"]
+tool-output -.->|"Updates"| dir-docs
+tool-output -.->|"Uses"| dir-template
+tool-run["Run<br/>[Component: Rust]<br/><br/>Main loop for a tool"]
+tool-run -.->|"Creates"| tool-model
+tool-run -.->|"Creates"| tool-output
+```
+
+
+Components for serve mode:
+
+```mermaid
+flowchart LR
+
+dir-model
+dir-template
+
+subgraph "symo"
+  tool-run
+  tool-model
+  tool-output
+  tool-watch
+  tool-serve
+end
+
+dir-docs
+
+
+dir-docs[("out docs<br/>[Container: Dir]<br/><br/>Directory with output markdown files")]
+dir-model[("YAML model<br/>[Container: Dir]<br/><br/>Directory with yaml model files")]
+dir-template[("template docs<br/>[Container: Dir]<br/><br/>Directory with template markdown files")]
+tool-model["Model<br/>[Component: Rust]<br/><br/>Create & maintain model"]
+tool-model -.->|"Uses"| dir-model
+tool-output["Output<br/>[Component: Rust]<br/><br/>Create output files"]
+tool-output -.->|"Updates"| dir-docs
+tool-output -.->|"Uses"| dir-template
+tool-run["Run<br/>[Component: Rust]<br/><br/>Main loop for a tool"]
+tool-run -.->|"Creates"| tool-model
+tool-run -.->|"Creates"| tool-output
+tool-run -.->|"Creates"| tool-serve
+tool-run -.->|"Creates"| tool-watch
+tool-serve["Serve<br/>[Component: Rust]<br/><br/>Static http server for docs directory"]
+tool-serve -.->|"Uses"| dir-docs
+tool-watch["Watch<br/>[Component: Rust]<br/><br/>Watch for changes in modules or templates"]
+tool-watch -.->|"Creates"| tool-model
+tool-watch -.->|"Creates"| tool-output
+tool-watch -.->|"Uses"| dir-model
+tool-watch -.->|"Uses"| dir-template
+```
+
+
+Dataflow for one time run mode:
+
+```mermaid
+flowchart LR
+
+dir-model
+dir-template
+
+subgraph "symo"
+  tool-model
+  tool-output
+end
+
+dir-docs
+
+
+dir-docs[("out docs<br/>[Container: Dir]<br/><br/>Directory with output markdown files")]
+dir-model[("YAML model<br/>[Container: Dir]<br/><br/>Directory with yaml model files")]
+dir-model ==>|"YAML files"| tool-model
+dir-template[("template docs<br/>[Container: Dir]<br/><br/>Directory with template markdown files")]
+dir-template ==>|"Markdown template files"| tool-output
+tool-model["Model<br/>[Component: Rust]<br/><br/>Create & maintain model"]
+tool-model ==>|"Model data"| tool-output
+tool-output["Output<br/>[Component: Rust]<br/><br/>Create output files"]
+tool-output ==>|"Markdown files"| dir-docs
+```
+
+
+Dataflow for serve mode:
+
+```mermaid
+flowchart LR
+
+dir-model
+dir-template
+
+subgraph "symo"
+  tool-model
+  tool-output
+  tool-watch
+  tool-serve
+end
+
+dir-docs
+
+
+dir-docs[("out docs<br/>[Container: Dir]<br/><br/>Directory with output markdown files")]
+dir-docs ==>|"Context of files"| tool-serve
+dir-model[("YAML model<br/>[Container: Dir]<br/><br/>Directory with yaml model files")]
+dir-model ==>|"YAML files"| tool-model
+dir-model ==>|"files change info"| tool-watch
+dir-template[("template docs<br/>[Container: Dir]<br/><br/>Directory with template markdown files")]
+dir-template ==>|"Markdown template files"| tool-output
+dir-template ==>|"files change info"| tool-watch
+tool-model["Model<br/>[Component: Rust]<br/><br/>Create & maintain model"]
+tool-model ==>|"Model data"| tool-output
+tool-output["Output<br/>[Component: Rust]<br/><br/>Create output files"]
+tool-output ==>|"Markdown files"| dir-docs
+tool-serve["Serve<br/>[Component: Rust]<br/><br/>Static http server for docs directory"]
+tool-watch["Watch<br/>[Component: Rust]<br/><br/>Watch for changes in modules or templates"]
 ```
 
 

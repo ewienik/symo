@@ -36,11 +36,27 @@ Serve with watch and listening addr:
 symo dir-with-models dir-with-docs-templates dir-output -s -a localhost:8000
 ```
 
-## Desing
+## Design
 
-The Concept of symo
+The Concept of symo:
 
 {{{overall-concept}}}
+
+Components for one time run mode:
+
+{{{components-one-time-mode}}}
+
+Components for serve mode:
+
+{{{components-serve-mode}}}
+
+Dataflow for one time run mode:
+
+{{{dataflow-one-time-mode}}}
+
+Dataflow for serve mode:
+
+{{{dataflow-serve-mode}}}
 
 ## License
 
